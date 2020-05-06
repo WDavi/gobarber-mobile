@@ -6,11 +6,15 @@ import {
   KeyboardAvoidingView,
   Platform,
   TextInput,
+  Alert,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
 import Icon from 'react-native-vector-icons/Feather';
+import * as Yup from 'yup';
+
+import getValidationErrors from '../../utils/getValidationErros';
 
 import logoImg from '../../assets/logo.png';
 
@@ -19,14 +23,52 @@ import Input from '../../components/Input';
 
 import { Container, Title, GoToLogon, GoToLogonText } from './styles';
 
+interface SignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
+
 const SignUp: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback((data: object) => {
-    console.log(data);
+  const handleSignUp = useCallback(async (data: SignUpFormData) => {
+    try {
+      const schema = Yup.object().shape({
+        name: Yup.string().required('Nome obrigatório'),
+        email: Yup.string()
+          .required('E-mail obrigatório')
+          .email('Digite um e-mail válido'),
+        password: Yup.string().min(6, 'No mínimo 6 digítos'),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      formRef.current?.setErrors({});
+
+      Alert.alert(
+        'Cadastrastado com sucesso!',
+        'Você já pode fazer seu logon no GoBarber',
+      );
+    } catch (err) {
+      if (err instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(err);
+
+        formRef.current?.setErrors(errors);
+
+        return;
+      }
+
+      Alert.alert(
+        'Erro no cadastramento',
+        'Ocorreu um erro ao criar o cadastro, tente novamente.',
+      );
+    }
   }, []);
   const navigation = useNavigation();
   return (
