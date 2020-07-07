@@ -8,7 +8,7 @@ export const Container = styled.View`
 
 export const Header = styled.View`
   padding: 24px;
-  padding-top: ${Platform.OS === 'android' ? 0 : getStatusBarHeight() + 24}px;
+  padding-top: ${Platform.OS === 'android' ? 12 : getStatusBarHeight() + 24}px;
   background: #28262e;
 
   flex-direction: row;
